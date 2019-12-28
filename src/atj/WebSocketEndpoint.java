@@ -37,6 +37,14 @@ public class WebSocketEndpoint {
 
 		}
 	}
+	// metoda do odbierania plików w formacie binarnym
+	@OnMessage(maxMessageSize = 1024000)
+	public void onMessage(byte[] buffer, Session session) {
+		System.out.println("New Binary Message Received");
+		System.out.println(buffer.length);
+
+
+	}
 	
 	@OnClose
 	public void onClose(Session session, CloseReason closeReason){

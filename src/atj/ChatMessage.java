@@ -43,5 +43,4 @@ public String toString() {
 	return toString().format("[%s] %s", getUser(), getMessage());
 }
 
-
 }
