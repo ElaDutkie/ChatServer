@@ -1,7 +1,9 @@
 package atj;
 
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.enterprise.context.ApplicationScoped;
 import javax.websocket.CloseReason;
@@ -40,8 +42,16 @@ public class WebSocketEndpoint {
 	// metoda do odbierania plików w formacie binarnym
 	@OnMessage(maxMessageSize = 1024000)
 	public void onMessage(byte[] buffer, Session session) {
+		try {
+			//jak podłączyć, żeby wysyłać różne pliki, jak przesłać nazwę pliku
+			Files.write(new File("D:/ATJ/CHAT/file.txt").toPath(), buffer);
+		} catch (IOException e) {
+			e.printStackTrace();
+		};
+
 		System.out.println("New Binary Message Received");
 		System.out.println(buffer.length);
+
 
 
 	}
