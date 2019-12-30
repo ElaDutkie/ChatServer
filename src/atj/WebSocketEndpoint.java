@@ -4,6 +4,9 @@ package atj;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.sql.SQLOutput;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.enterprise.context.ApplicationScoped;
 import javax.websocket.CloseReason;
@@ -44,7 +47,13 @@ public class WebSocketEndpoint {
 	public void onMessage(byte[] buffer, Session session) {
 		try {
 			//jak podłączyć, żeby wysyłać różne pliki, jak przesłać nazwę pliku
-			Files.write(new File("D:/ATJ/CHAT/file.txt").toPath(), buffer);
+//			Files.write(new File("D:/ATJ/CHAT/file.txt").toPath(), buffer);
+			Path fileName = new File(buffer.toString()).toPath().getFileName();
+			Path filePath = Paths.get(("D:/ATJ/przeslaneNaServer/" + fileName));
+			Files.write(filePath, buffer);
+
+
+		//???
 		} catch (IOException e) {
 			e.printStackTrace();
 		};
