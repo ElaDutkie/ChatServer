@@ -1,12 +1,8 @@
 package atj;
 
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.sql.SQLOutput;
+import java.nio.ByteBuffer;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.enterprise.context.ApplicationScoped;
 import javax.websocket.CloseReason;
@@ -22,7 +18,7 @@ import javax.websocket.server.ServerEndpoint;
 
 public class WebSocketEndpoint {
     private static final ConcurrentLinkedQueue<Session> sessions = new ConcurrentLinkedQueue<>();
-    private String uploadingFileName;
+    private String messageWithFileName;
 
     @OnOpen
     public void onOpen(Session session) {
@@ -33,7 +29,7 @@ public class WebSocketEndpoint {
     public void onMessage(String message, Session session) {
         System.out.println(message);
         if (message.contains("#123456789#")) {
-            uploadingFileName = message.replace("#123456789#", "");
+            messageWithFileName = message;
 
         } else {
             for (Session aSession : sessions) {
@@ -51,23 +47,25 @@ public class WebSocketEndpoint {
     }
 
 
-
-
-    // metoda do odbierania plików w formacie binarnym
     @OnMessage(maxMessageSize = 1024000)
     public void onMessage(byte[] buffer, Session session) {
-        try {
 
-            Path fileName = new File(buffer.toString()).toPath().getFileName();
-			System.out.println(uploadingFileName);
-            Path filePath = Paths.get(("D:/ATJ/przeslaneNaServer/" + uploadingFileName));
-            Files.write(filePath, buffer);
+//            Path fileName = new File(buffer.toString()).toPath().getFileName();
+//            System.out.println(uploadingFileName);
+//            Path filePath = Paths.get(("D:/ATJ/przeslaneNaServer/" + uploadingFileName));
+//            Files.write(filePath, buffer);
+        for (Session aSession : sessions) {
+            if (!aSession.equals(session)) {
+                try {
+                    aSession.getBasicRemote().sendBinary(ByteBuffer.wrap(buffer));
+					aSession.getBasicRemote().sendText(messageWithFileName);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
 
-
-        } catch (IOException e) {
-            e.printStackTrace();
         }
-        ;
+
         System.out.println("New Binary Message Received");
         System.out.println(buffer.length);
     }
