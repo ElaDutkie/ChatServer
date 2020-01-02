@@ -21,56 +21,65 @@ import javax.websocket.server.ServerEndpoint;
 @ServerEndpoint("/chatendpoint")
 
 public class WebSocketEndpoint {
-	private static final ConcurrentLinkedQueue<Session> sessions = new ConcurrentLinkedQueue<>();
+    private static final ConcurrentLinkedQueue<Session> sessions = new ConcurrentLinkedQueue<>();
+    private String uploadingFileName;
 
-	@OnOpen
-	public void onOpen(Session session) {
-		sessions.add(session);
-	}
+    @OnOpen
+    public void onOpen(Session session) {
+        sessions.add(session);
+    }
 
-	@OnMessage
-	public void onMessage(String message, Session session) {
-		System.out.println(message);
-		for (Session aSession:sessions) {
-			if(!aSession.equals(session)){
-				try {
-					aSession.getBasicRemote().sendText(message);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
+    @OnMessage
+    public void onMessage(String message, Session session) {
+        System.out.println(message);
+        if (message.contains("#123456789#")) {
+            uploadingFileName = message.replace("#123456789#", "");
 
-		}
-	}
-	// metoda do odbierania plików w formacie binarnym
-	@OnMessage(maxMessageSize = 1024000)
-	public void onMessage(byte[] buffer, Session session) {
-		try {
-			//jak podłączyć, żeby wysyłać różne pliki, jak przesłać nazwę pliku
-//			Files.write(new File("D:/ATJ/CHAT/file.txt").toPath(), buffer);
-			Path fileName = new File(buffer.toString()).toPath().getFileName();
-			Path filePath = Paths.get(("D:/ATJ/przeslaneNaServer/" + fileName));
-			Files.write(filePath, buffer);
+        } else {
+            for (Session aSession : sessions) {
+                if (!aSession.equals(session)) {
+                    try {
+                        aSession.getBasicRemote().sendText("" + message);
+//                        aSession.getBasicRemote().sendBinary();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
 
-
-		//???
-		} catch (IOException e) {
-			e.printStackTrace();
-		};
-
-		System.out.println("New Binary Message Received");
-		System.out.println(buffer.length);
+            }
+        }
+    }
 
 
 
-	}
-	
-	@OnClose
-	public void onClose(Session session, CloseReason closeReason){
-		sessions.remove(session);
-	}
-	@OnError
-	public void onError(Throwable error) {}
-	
+
+    // metoda do odbierania plików w formacie binarnym
+    @OnMessage(maxMessageSize = 1024000)
+    public void onMessage(byte[] buffer, Session session) {
+        try {
+
+            Path fileName = new File(buffer.toString()).toPath().getFileName();
+			System.out.println(uploadingFileName);
+            Path filePath = Paths.get(("D:/ATJ/przeslaneNaServer/" + uploadingFileName));
+            Files.write(filePath, buffer);
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        ;
+        System.out.println("New Binary Message Received");
+        System.out.println(buffer.length);
+    }
+
+    @OnClose
+    public void onClose(Session session, CloseReason closeReason) {
+        sessions.remove(session);
+    }
+
+    @OnError
+    public void onError(Throwable error) {
+    }
+
 
 }
