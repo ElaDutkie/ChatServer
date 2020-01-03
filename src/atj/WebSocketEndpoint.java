@@ -57,8 +57,9 @@ public class WebSocketEndpoint {
         for (Session aSession : sessions) {
             if (!aSession.equals(session)) {
                 try {
+                    aSession.getBasicRemote().sendText(messageWithFileName);
                     aSession.getBasicRemote().sendBinary(ByteBuffer.wrap(buffer));
-					aSession.getBasicRemote().sendText(messageWithFileName);
+
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
